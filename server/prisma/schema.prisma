@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  supabaseId String?  @unique
+  name       String
+  email      String   @unique
+  role       Role     @default(VIEWER)
+  mfaEnabled Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  assignedCases Case[]
+  auditLogs     AuditLog[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  PROGRAM_MANAGER
+  PROTECTION_OFFICER
+  CASE_WORKER
+  DATA_OFFICER
+  FIELD_OFFICER
+  AUDITOR
+  VIEWER
+}
+
+model Person {
+  id                 String   @id @default(uuid())
+  pseudonym          String
+  ageRange           String
+  sex                Sex
+  region             String
+  lastKnownLocation  String
+  verificationStatus VerificationStatus @default(Pending)
+  restrictedName     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  cases       Case[]
+  familyLinks FamilyLink[]
+}
+
+enum Sex {
+  Female
+  Male
+  Unknown
+}
+
+enum VerificationStatus {
+  Verified
+  Unverified
+  Pending
+}
+
+model Case {
+  id              String     @id @default(uuid())
+  type            String
+  priority        Priority
+  region          String
+  location        String
+  status          CaseStatus @default(NEW)
+  summary         String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  assignedToId    String?
+  assignedTo      User?      @relation(fields: [assignedToId], references: [id])
+  
+  personId        String
+  person          Person     @relation(fields: [personId], references: [id])
+  
+  notes           CaseNote[]
+  familyLinks     FamilyLink[]
+  referrals       Referral[]
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum CaseStatus {
+  NEW
+  ASSESSMENT
+  INVESTIGATION
+  REFERRAL
+  FOLLOW_UP
+  RESOLVED
+  ARCHIVED
+}
+
+model CaseNote {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model FamilyLink {
+  id            String   @id @default(uuid())
+  status        String
+  lastContact   String
+  circumstances String
+  matchScore    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  caseId        String
+  case          Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  personId      String
+  person        Person   @relation(fields: [personId], references: [id])
+}
+
+model Referral {
+  id           String   @id @default(uuid())
+  category     String
+  organization String
+  priority     Priority
+  status       ReferralStatus @default(PENDING)
+  outcome      String?
+  date         DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+enum ReferralStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  resource  String
+  result    String
+  timestamp DateTime @default(now())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  type      String
+  severity  String
+  status    String
+  timestamp DateTime @default(now())
+}
+
+model ServicePoint {
+  id       String @id @default(uuid())
+  name     String
+  category String
+  region   String
+  lat      Float
+  lng      Float
+  hours    String
+  services String
+}
