@@ -1,6 +1,17 @@
 # API Specification
 
-Base path: `/api/v1`
+> **Implementation status:** Partially implemented
+> Last verified against code: 2026-08-12
+
+Base path: `/api/v1` (Note: Current code uses `/api`)
+
+## Implemented
+
+- `GET /api/health`
+- `GET /api/cases`
+- `POST /api/cases`
+
+## Planned (Target Design)
 
 Authentication:
 
@@ -12,8 +23,6 @@ Authentication:
 
 Cases:
 
-- `GET /cases`
-- `POST /cases`
 - `GET /cases/:id`
 - `PATCH /cases/:id`
 - `POST /cases/:id/assign`

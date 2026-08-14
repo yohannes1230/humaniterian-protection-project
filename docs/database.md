@@ -1,29 +1,36 @@
 # Database Design
 
+> **Implementation status:** Partially implemented
+> Last verified against code: 2026-08-12
+
 Target database: PostgreSQL with Prisma.
 
-Core tables:
+## Implemented Tables
 
-- `users`
+- `users` (Role is an enum, not a separate table)
+- `persons`
+- `cases`
+- `case_notes`
+- `family_links`
+- `referrals`
+- `audit_logs`
+- `security_events`
+- `service_points`
+
+## Planned Tables (Target Design)
+
 - `roles`
 - `permissions`
 - `user_roles`
 - `role_permissions`
-- `persons`
 - `person_identifiers`
-- `cases`
 - `case_assignments`
-- `case_notes`
 - `case_documents`
-- `family_link_cases`
 - `missing_person_cases`
 - `potential_matches`
 - `match_reviews`
-- `referrals`
 - `services`
 - `service_locations`
-- `audit_logs`
-- `security_events`
 - `data_quality_issues`
 - `retention_policies`
 - `offline_sync_queue`

@@ -8,3 +8,8 @@ dist
 secrets.json
 coverage
 .DS_Store
+server/.agents/
+server/.claude/
+server/.windsurf/
+*.tsbuildinfo
+humaniterian protection project/

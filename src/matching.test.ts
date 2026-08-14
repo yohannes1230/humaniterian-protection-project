@@ -1,27 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { calculatePotentialMatchScore } from "./matching";
+import { calculatePotentialMatchScore, computeNameScore, levenshteinDistance } from "./matching";
 
 describe("calculatePotentialMatchScore", () => {
-  it("uses the documented humanitarian demo weights", () => {
-    expect(
-      calculatePotentialMatchScore({
-        nameScore: 92,
-        ageScore: 100,
-        locationScore: 90,
-        dateScore: 75,
-        otherScore: 82
-      })
-    ).toBe(88);
-  });
-
-  it("does not produce an automatic identity decision", () => {
+  it("weights attributes correctly", () => {
     const score = calculatePotentialMatchScore({
-      nameScore: 100,
-      ageScore: 100,
-      locationScore: 100,
-      dateScore: 100,
+      name1: "John Doe",
+      name2: "John Doe",
+      ageScore: 80,
+      locationScore: 50,
+      dateScore: 90,
       otherScore: 100
     });
-    expect(score).toBe(100);
+    
+    expect(score).toBe(86);
+  });
+});
+
+describe("levenshteinDistance", () => {
+  it("computes correctly", () => {
+    expect(levenshteinDistance("kitten", "sitting")).toBe(3);
+  });
+});
+
+describe("computeNameScore", () => {
+  it("computes correctly", () => {
+    expect(computeNameScore("John", "John")).toBe(100);
+    expect(computeNameScore("Jon", "John")).toBe(75);
   });
 });
