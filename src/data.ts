@@ -1,27 +1,62 @@
-import type { AuditLog, FamilyLink, HumanitarianCase, Person, Referral, SecurityEvent, ServicePoint, User } from "./types";
+import type { AuditLog, Consent, FamilyLink, HumanitarianCase, Person, Referral, SecurityEvent, ServicePoint, User } from "./types";
 
 export const users: User[] = [
   { id: "u1", name: "Miriam Tesfaye", email: "admin@hpis.demo", role: "SUPER_ADMIN", mfaEnabled: true },
-  { id: "u2", name: "Program Manager 02", email: "manager@hpis.demo", role: "PROGRAM_MANAGER", mfaEnabled: true },
-  { id: "u3", name: "Protection Officer 04", email: "protection@hpis.demo", role: "PROTECTION_OFFICER", mfaEnabled: true },
-  { id: "u4", name: "Case Worker 11", email: "caseworker@hpis.demo", role: "CASE_WORKER", mfaEnabled: false },
-  { id: "u5", name: "Data Officer 03", email: "data@hpis.demo", role: "DATA_OFFICER", mfaEnabled: true },
-  { id: "u6", name: "Field Officer 09", email: "field@hpis.demo", role: "FIELD_OFFICER", mfaEnabled: false },
-  { id: "u7", name: "Read-only Auditor", email: "auditor@hpis.demo", role: "AUDITOR", mfaEnabled: true }
+  { id: "u2", name: "Abebe Bikila", email: "manager@hpis.demo", role: "PROGRAM_MANAGER", mfaEnabled: true },
+  { id: "u3", name: "Sara Tefera", email: "protection@hpis.demo", role: "PROTECTION_OFFICER", mfaEnabled: true },
+  { id: "u4", name: "Dawit Kebede", email: "caseworker@hpis.demo", role: "CASE_WORKER", mfaEnabled: false },
+  { id: "u5", name: "Hiwot Haile", email: "data@hpis.demo", role: "DATA_OFFICER", mfaEnabled: true },
+  { id: "u6", name: "Yonas Girma", email: "field@hpis.demo", role: "FIELD_OFFICER", mfaEnabled: false },
+  { id: "u7", name: "Helen Assefa", email: "auditor@hpis.demo", role: "AUDITOR", mfaEnabled: true },
+  { id: "u8", name: "Observer Account", email: "viewer@hpis.demo", role: "VIEWER", mfaEnabled: false }
 ];
 
+export const sampleConsents: Record<string, Consent[]> = {
+  "PERSON-ET-000184": [
+    {
+      id: "CONS-001",
+      personId: "PERSON-ET-000184",
+      purpose: "Family Tracing & Reconnection",
+      scope: "Cross-border family matching and ICRC Red Cross message network exchange",
+      grantedAt: "2026-08-11 09:30",
+      revokedAt: null,
+      grantedByUserId: "u3"
+    },
+    {
+      id: "CONS-002",
+      personId: "PERSON-ET-000184",
+      purpose: "Psychosocial Support Referral",
+      scope: "Sharing minimal intake dossier with specialized partner clinic",
+      grantedAt: "2026-08-11 10:15",
+      revokedAt: null,
+      grantedByUserId: "u3"
+    }
+  ],
+  "PERSON-ET-000291": [
+    {
+      id: "CONS-003",
+      personId: "PERSON-ET-000291",
+      purpose: "Missing Person Tracing Inquiry",
+      scope: "Regional field verification across IDP transit hubs",
+      grantedAt: "2026-08-08 14:20",
+      revokedAt: null,
+      grantedByUserId: "u3"
+    }
+  ]
+};
+
 export const persons: Person[] = [
-  { id: "PERSON-ET-000184", pseudonym: "Person A-184", restrictedName: "Synthetic Name A", ageRange: "18-25", sex: "Female", region: "Amhara", lastKnownLocation: "North Wollo", verificationStatus: "Pending" },
-  { id: "PERSON-ET-000291", pseudonym: "Person B-291", restrictedName: "Synthetic Name B", ageRange: "26-35", sex: "Male", region: "Tigray", lastKnownLocation: "Mekelle", verificationStatus: "Unverified" },
+  { id: "PERSON-ET-000184", pseudonym: "Person A-184", restrictedName: "Synthetic Name A", ageRange: "18-25", sex: "Female", region: "Amhara", lastKnownLocation: "North Wollo", verificationStatus: "Pending", consents: sampleConsents["PERSON-ET-000184"] },
+  { id: "PERSON-ET-000291", pseudonym: "Person B-291", restrictedName: "Synthetic Name B", ageRange: "26-35", sex: "Male", region: "Tigray", lastKnownLocation: "Mekelle", verificationStatus: "Unverified", consents: sampleConsents["PERSON-ET-000291"] },
   { id: "PERSON-ET-000377", pseudonym: "Person C-377", ageRange: "36-45", sex: "Unknown", region: "Oromia", lastKnownLocation: "East Shewa", verificationStatus: "Verified" },
   { id: "PERSON-ET-000418", pseudonym: "Person D-418", ageRange: "12-17", sex: "Female", region: "Afar", lastKnownLocation: "Semera", verificationStatus: "Pending" }
 ];
 
 export const cases: HumanitarianCase[] = [
-  { id: "HP-2026-00184", type: "FAMILY_SEPARATION", priority: "HIGH", region: "Amhara", location: "North Wollo", status: "INVESTIGATION", assignedOfficer: "Protection Officer 04", opened: "2026-08-11", updated: "2026-08-11", personId: "PERSON-ET-000184", summary: "Family separation case requiring tracing and psychosocial referral review.", notes: ["Initial intake completed with minimal required data.", "Consent notice acknowledged in demo workflow."] },
-  { id: "HP-2026-00291", type: "MISSING_PERSON", priority: "CRITICAL", region: "Tigray", location: "Mekelle", status: "ASSESSMENT", assignedOfficer: "Protection Officer 04", opened: "2026-08-08", updated: "2026-08-10", personId: "PERSON-ET-000291", summary: "Missing-person tracing request with potential match pending human verification.", notes: ["Potential match generated by deterministic demo scoring."] },
-  { id: "HP-2026-00377", type: "PROTECTION", priority: "MEDIUM", region: "Oromia", location: "East Shewa", status: "FOLLOW_UP", assignedOfficer: "Case Worker 11", opened: "2026-07-27", updated: "2026-08-09", personId: "PERSON-ET-000377", summary: "Protection follow-up with referral outcome pending.", notes: ["Follow-up appointment recorded offline and synchronized."] },
-  { id: "HP-2026-00418", type: "ASSISTANCE", priority: "LOW", region: "Afar", location: "Semera", status: "REFERRAL", assignedOfficer: "Field Officer 09", opened: "2026-08-01", updated: "2026-08-07", personId: "PERSON-ET-000418", summary: "Assistance referral and service mapping demonstration.", notes: ["Fictional service directory used for demo only."] }
+  { id: "HP-2026-00184", type: "FAMILY_SEPARATION", priority: "HIGH", region: "Amhara", location: "North Wollo", status: "INVESTIGATION", assignedOfficer: "Sara Tefera (Protection Off.)", opened: "2026-08-11", updated: "2026-08-11", personId: "PERSON-ET-000184", summary: "Family separation case requiring tracing and psychosocial referral review.", notes: ["Initial intake completed with minimal required data.", "Informed consent notice registered and signed."] },
+  { id: "HP-2026-00291", type: "MISSING_PERSON", priority: "CRITICAL", region: "Tigray", location: "Mekelle", status: "ASSESSMENT", assignedOfficer: "Sara Tefera (Protection Off.)", opened: "2026-08-08", updated: "2026-08-10", personId: "PERSON-ET-000291", summary: "Missing-person tracing request with potential match pending human verification.", notes: ["Potential match generated by deterministic demo scoring."] },
+  { id: "HP-2026-00377", type: "PROTECTION", priority: "MEDIUM", region: "Oromia", location: "East Shewa", status: "FOLLOW_UP", assignedOfficer: "Dawit Kebede (Case Worker)", opened: "2026-07-27", updated: "2026-08-09", personId: "PERSON-ET-000377", summary: "Protection follow-up with referral outcome pending.", notes: ["Follow-up appointment recorded offline and synchronized."] },
+  { id: "HP-2026-00418", type: "ASSISTANCE", priority: "LOW", region: "Afar", location: "Semera", status: "REFERRAL", assignedOfficer: "Yonas Girma (Field Officer)", opened: "2026-08-01", updated: "2026-08-07", personId: "PERSON-ET-000418", summary: "Assistance referral and service mapping demonstration.", notes: ["Fictional service directory used for demo only."] }
 ];
 
 export const familyLinks: FamilyLink[] = [
@@ -61,7 +96,7 @@ export const caseTrend = [
   { name: "Apr", cases: 164, resolved: 92 },
   { name: "May", cases: 188, resolved: 121 },
   { name: "Jun", cases: 214, resolved: 139 },
-  { name: "Jul", cases: 238, resolved: 158 },
+  { name: "Jul", brain: 238, resolved: 158 },
   { name: "Aug", cases: 248, resolved: 184 }
 ];
 

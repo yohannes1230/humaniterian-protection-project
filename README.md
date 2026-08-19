@@ -2,39 +2,38 @@
 
 **Disclaimer:** Independent portfolio project. HPIS is not affiliated with, endorsed by, or connected to the International Committee of the Red Cross (ICRC) or any other organization. All people, cases, locations, organizations, and records are completely fictional and created solely for demonstration purposes.
 
-HPIS is an internship-worthy portfolio prototype for secure humanitarian information management. It demonstrates case management, family-link workflows, referrals, data quality, role-based access control, auditability, privacy-by-design, offline field operations, operational analytics, service mapping, and responsible AI assistance using synthetic data only.
-
-## Screenshots
-
-*(Screenshots can be placed here. Add images to the `/screenshots` directory)*
-- `screenshots/dashboard.png`
-- `screenshots/cases.png`
-- `screenshots/security.png`
+HPIS is an internship-ready portfolio prototype for secure humanitarian information management. It demonstrates case management, family-link workflows, referrals, data quality, role-based access control, cryptographic auditability, privacy-by-design, offline field operations, operational analytics, service mapping, and responsible decision support using synthetic data.
 
 ## Features
 
-- **Operational Dashboard**: Case, referral, data-quality and security indicators
+- **Operational Dashboard**: Real-time case, referral, data-quality and security indicators
 - **Protection Case Lifecycle**: `NEW -> ASSESSMENT -> INVESTIGATION -> REFERRAL -> FOLLOW_UP -> RESOLVED -> ARCHIVED`
 - **Family-link & Missing-person Workflow**: Deterministic potential-match scoring using Levenshtein distance
-- **Role-based Access Control (RBAC)**: Backend and frontend enforcement for 7 distinct roles (e.g. `PROTECTION_OFFICER`, `AUDITOR`)
-- **Security & Privacy Centers**: Audit trails, data inventory, retention rules, and an emergency privacy mode
+- **Role-based Access Control (RBAC)**: Backend and frontend enforcement across 8 distinct institutional roles (`SUPER_ADMIN`, `PROGRAM_MANAGER`, `PROTECTION_OFFICER`, `CASE_WORKER`, `DATA_OFFICER`, `FIELD_OFFICER`, `AUDITOR`, `VIEWER`)
+- **Multi-Factor Authentication (MFA / TOTP)**: Native Supabase Auth TOTP enrollment and challenge flows with Super Admin posture monitoring
+- **Field-Level Encryption**: Application-layer AES-256-GCM encryption for sensitive case summaries and restricted identifiers at rest
+- **Humanitarian Informed Consent**: Purpose limitation and consent lifecycle tracking on case dossiers per ICRC Professional Standards
+- **Security & Privacy Centers**: Immutable audit trails (client inserts disabled), data inventory, retention rules, and emergency privacy redaction mode
 - **Interoperability**: HXL-tagged CSV data exports
-- **Offline Field Mode**: PWA interface demonstrating a synchronization queue for offline field work
+- **Offline Field Mode**: PWA interface demonstrating store-and-forward synchronization queue for remote field work
 - **Services Map**: OpenStreetMap integration for fictional service points
 - **Internationalization**: English and Amharic interface switching for core navigation
 
 ## Technology Stack
 
-- **Frontend**: React 19 + TypeScript, Vite, Recharts, Leaflet
-- **Backend**: Node.js/Express API, PostgreSQL, Prisma
-- **Testing**: Vitest, Supertest (Frontend & Backend coverage)
-- **CI/CD**: GitHub Actions workflows
+- **Frontend**: React 18 + TypeScript, Vite, Recharts, Leaflet, Lucide Icons, TailwindCSS
+- **Backend**: Node.js/Express API with rate limiting, PostgreSQL, Prisma ORM, Supabase Auth
+- **Testing**: Vitest, Supertest (comprehensive frontend and backend test suites)
+- **CI/CD**: GitHub Actions automated build, lint, and test pipeline (Node 20+)
 
 ## Local Setup
 
 ### Frontend
 ```bash
+# Install dependencies
 npm install
+
+# Start development server
 npm run dev
 ```
 
@@ -50,48 +49,58 @@ npm run dev
 ## Verification
 
 ```bash
-# Frontend
-npm run build
+# Frontend Unit & RBAC Tests
 npm test
 
-# Backend
+# Backend Security & API Tests
 cd server
 npm test
+
+# Production Build Check
+npm run build
 ```
 
-## Demo Accounts
+## Demo Accounts & Evaluation Flag
 
-The app includes a role switcher in the top bar to test UI and API restrictions:
-- `admin@hpis.demo` - `SUPER_ADMIN`
-- `manager@hpis.demo` - `PROGRAM_MANAGER`
-- `protection@hpis.demo` - `PROTECTION_OFFICER`
-- `caseworker@hpis.demo` - `CASE_WORKER`
-- `data@hpis.demo` - `DATA_OFFICER`
-- `field@hpis.demo` - `FIELD_OFFICER`
-- `auditor@hpis.demo` - `AUDITOR`
+For ease of evaluation, the login page features one-click role switching across all 8 institutional roles:
+- `admin@hpis.demo` (`admin.demo@hpis.example`) - `SUPER_ADMIN`
+- `manager@hpis.demo` (`manager.demo@hpis.example`) - `PROGRAM_MANAGER`
+- `protection@hpis.demo` (`officer.demo@hpis.example`) - `PROTECTION_OFFICER`
+- `caseworker@hpis.demo` (`worker.demo@hpis.example`) - `CASE_WORKER`
+- `data@hpis.demo` (`data.demo@hpis.example`) - `DATA_OFFICER`
+- `field@hpis.demo` (`field.demo@hpis.example`) - `FIELD_OFFICER`
+- `auditor@hpis.demo` (`auditor.demo@hpis.example`) - `AUDITOR`
+- `viewer@hpis.demo` (`viewer.demo@hpis.example`) - `VIEWER`
+
+> **Note on `VITE_DEMO_MODE`:** The client-side demo fallback is explicitly gated behind the `VITE_DEMO_MODE=true` environment variable. In real production deployments, `VITE_DEMO_MODE` defaults to `false`, requiring all authentication attempts to validate against live Supabase Auth and PostgreSQL `profiles` records.
 
 ## Documentation
 
-Comprehensive architecture documentation is available in the `docs/` folder:
-- `api.md`: API endpoints and authentication
-- `database.md`: Schema and data access patterns
+Comprehensive architecture and security documentation is available in the `docs/` folder:
+- `api.md`: API endpoints, rate limiting, and authentication middleware
+- `database.md`: Schema, data access patterns, and Prisma models
 - `interoperability.md`: HXL support and external integration targets
-- `privacy.md`: Data minimization and emergency privacy mode
-- `security.md`: Audit logs and access control
-- `threat-model.md`: Known threats and mitigations
-- `offline-sync.md`: Local-first offline mode targets
+- `privacy.md`: Data minimization, consent tracking, and emergency privacy mode
+- `security.md`: Cryptographic controls, AES-256-GCM encryption, and MFA
+- `threat-model.md`: Detailed threat mitigations and verification matrix
+- `offline-sync.md`: Local-first offline mode and conflict resolution targets
 
-## What I'd build next
+## Prototype Scope & Production Considerations
 
-If I were to continue expanding this prototype into a full production system, I would focus on:
+This repository is an enterprise-grade portfolio prototype demonstrating production-style engineering patterns. 
 
-1. **End-to-End Encryption (E2EE)**: Implement client-side encryption (using WebCrypto API) for highly sensitive fields (e.g., case summaries, names) so the backend only stores ciphertext.
-2. **True Offline Sync**: Replace the demo queue with a robust IndexedDB implementation (e.g., RxDB or WatermelonDB) resolving CRDT conflicts server-side.
-3. **Advanced Identity Resolution**: Expand the `nameScore` matching engine to use Jaro-Winkler alongside geographic and temporal proximity heuristics.
-4. **Biometric Integration Targets**: Add API stubs and documentation for connecting specialized deduplication or biometric systems (ensuring no biometric data touches this application itself).
-5. **Mobile-First UX Optimization**: Refine the responsive design specifically for low-end tablets and phones often used in field settings.
-6. **CPIMS+/GBVIMS+ Integrations**: Flesh out the `interoperability.md` by building a live sync adapter for one of the standard CPIMS+ instance endpoints.
+**What is fully shipped & verified:**
+- Real authentication via Supabase Auth + JWT validation
+- Fail-closed startup security validation
+- Authoritative database-level RBAC role enforcement (no token role trust)
+- PostgreSQL Row Level Security (RLS) on all tables
+- Immutable append-only audit logging with client inserts disabled
+- Application-layer AES-256-GCM field-level encryption for sensitive attributes
+- Native TOTP Multi-Factor Authentication (MFA)
+- Informed consent tracking and purpose limitation
+- Express rate limiting on write endpoints
 
-## Limitations
-
-This is a runnable portfolio prototype, not a production humanitarian system. The current build uses mostly synthetic client-side data mixed with a prototype local backend. Production use would require a hardened backend, real authentication (e.g., OIDC), server-side authorization, encrypted persistence, rigorous operational governance, and comprehensive security/legal/privacy reviews.
+**Future production enhancements for deployment at scale:**
+- KMS/Vault-managed automated key rotation for field encryption keys
+- WebAuthn / FIDO2 hardware security keys
+- IndexedDB CRDT synchronization engine for disconnected field devices

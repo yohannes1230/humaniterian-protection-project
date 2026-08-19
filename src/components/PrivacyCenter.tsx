@@ -1,4 +1,4 @@
-import { Lock, Globe2, ShieldCheck, EyeOff } from 'lucide-react';
+import { Lock, ShieldCheck, EyeOff } from 'lucide-react';
 import { PageTitle, Panel, DataTable, StatusPill } from "./Shared";
 
 export function PrivacyCenter() {

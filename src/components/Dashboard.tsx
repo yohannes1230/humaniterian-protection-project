@@ -1,4 +1,4 @@
-import { BarChart3, Activity, FileText, AlertCircle, Users, CheckCircle2 } from 'lucide-react';
+import { BarChart3, Activity, FileText } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { regionCounts, caseTrend } from "../data";
 import { PageTitle, Metric, Panel, DataTable, StatusPill, statusColors } from "./Shared";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Plus, Filter, Download, ArrowLeft } from 'lucide-react';
+import { FileText, Plus, Filter, ArrowLeft } from 'lucide-react';
 import { PageTitle, Panel, DataTable, StatusPill, statusColors } from "./Shared";
 import type { HumanitarianCase } from "../types";
 import { persons } from "../data";

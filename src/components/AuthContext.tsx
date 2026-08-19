@@ -31,6 +31,10 @@ type AuthContextType = {
   signInWithOtp: (email: string) => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  enrollMfa: () => Promise<{ id?: string; qrCode?: string; secret?: string; uri?: string; error?: string }>;
+  verifyMfa: (factorId: string, challengeId: string, code: string) => Promise<{ error?: string }>;
+  unenrollMfa: (factorId: string) => Promise<{ error?: string }>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -41,7 +45,11 @@ const AuthContext = createContext<AuthContextType>({
   signInWithPassword: async () => ({ error: null }),
   signInWithOtp: async () => ({ error: null }),
   resetPassword: async () => ({ error: null }),
-  signOut: async () => {}
+  signOut: async () => {},
+  enrollMfa: async () => ({ error: "Not initialized" }),
+  verifyMfa: async () => ({ error: "Not initialized" }),
+  unenrollMfa: async () => ({ error: "Not initialized" }),
+  refreshProfile: async () => {}
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -49,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
 
   const applyProfile = (userId: string, email: string, userRole: Role, fullName: string, mfa: boolean = false) => {
     const prof: UserProfile = {
@@ -75,11 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
     } catch (e) {
-      console.warn("Supabase profiles query unavailable, checking local demo profile fallback");
+      console.warn("Supabase profiles query unavailable");
     }
 
-    // Fallback for seeded demo accounts or offline usage
-    if (DEMO_PROFILES[email]) {
+    // DEMO-ONLY fallback, active only when VITE_DEMO_MODE=true. Never enable in a real deployment.
+    if (isDemoMode && DEMO_PROFILES[email]) {
       const demo = DEMO_PROFILES[email];
       applyProfile(userId, email, demo.role, demo.name);
     } else {
@@ -87,10 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshProfile = async () => {
+    if (user?.email && user?.id) {
+      await fetchProfile(user.id, user.email);
+    }
+  };
+
   useEffect(() => {
     // Check existing stored session
     const storedDemo = localStorage.getItem("hpis_demo_session");
-    if (storedDemo) {
+    if (storedDemo && isDemoMode) {
       try {
         const parsed = JSON.parse(storedDemo);
         setUser({ id: parsed.id, email: parsed.email } as User);
@@ -123,15 +139,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isDemoMode]);
 
   const signInWithPassword = async (email: string, password: string): Promise<{ error: string | null }> => {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        // If Supabase remote service is unreachable, allow seeded demo accounts for evaluation
-        if (DEMO_PROFILES[email] && password === "demo1234") {
+        // DEMO-ONLY fallback, active only when VITE_DEMO_MODE=true. Never enable in a real deployment.
+        if (isDemoMode && DEMO_PROFILES[email] && password === "demo1234") {
           const demo = DEMO_PROFILES[email];
           const demoUser = { id: `00000000-0000-0000-0000-${email.length.toString().padStart(12, '0')}`, email } as User;
           const prof: UserProfile = {
@@ -158,7 +174,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return { error: null };
     } catch (err: any) {
-      if (DEMO_PROFILES[email] && password === "demo1234") {
+      // DEMO-ONLY fallback, active only when VITE_DEMO_MODE=true. Never enable in a real deployment.
+      if (isDemoMode && DEMO_PROFILES[email] && password === "demo1234") {
         const demo = DEMO_PROFILES[email];
         const demoUser = { id: `00000000-0000-0000-0000-000000000001`, email } as User;
         const prof: UserProfile = {
@@ -200,6 +217,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // ----------------------------------------------------------------------
+  // Supabase Auth Native MFA (TOTP) Methods
+  // ----------------------------------------------------------------------
+  const enrollMfa = async (): Promise<{ id?: string; qrCode?: string; secret?: string; uri?: string; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: 'totp',
+        issuer: 'HPIS Security'
+      });
+      if (error) return { error: error.message };
+      return {
+        id: data.id,
+        qrCode: data.totp?.qr_code,
+        secret: data.totp?.secret,
+        uri: data.totp?.uri
+      };
+    } catch (err: any) {
+      return { error: err.message || "Failed to enroll MFA factor" };
+    }
+  };
+
+  const verifyMfa = async (factorId: string, challengeId: string, code: string): Promise<{ error?: string }> => {
+    try {
+      const { error } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId,
+        code
+      });
+      if (error) return { error: error.message };
+
+      if (profile) {
+        setProfile({ ...profile, mfaEnabled: true });
+      }
+      return {};
+    } catch (err: any) {
+      return { error: err.message || "Failed to verify MFA challenge" };
+    }
+  };
+
+  const unenrollMfa = async (factorId: string): Promise<{ error?: string }> => {
+    try {
+      const { error } = await supabase.auth.mfa.unenroll({ factorId });
+      if (error) return { error: error.message };
+
+      if (profile) {
+        setProfile({ ...profile, mfaEnabled: false });
+      }
+      return {};
+    } catch (err: any) {
+      return { error: err.message || "Failed to unenroll MFA factor" };
+    }
+  };
+
   const signOut = async () => {
     localStorage.removeItem("hpis_demo_session");
     await supabase.auth.signOut();
@@ -209,7 +279,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, role, loading, signInWithPassword, signInWithOtp, resetPassword, signOut }}>
+    <AuthContext.Provider value={{
+      user,
+      profile,
+      role,
+      loading,
+      signInWithPassword,
+      signInWithOtp,
+      resetPassword,
+      signOut,
+      enrollMfa,
+      verifyMfa,
+      unenrollMfa,
+      refreshProfile
+    }}>
       {children}
     </AuthContext.Provider>
   );

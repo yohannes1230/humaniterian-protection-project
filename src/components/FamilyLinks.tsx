@@ -1,22 +1,22 @@
 import { useState } from "react";
-import { Users, Shield, CheckCircle2, ChevronRight, Info, AlertTriangle, UserCheck } from 'lucide-react';
+import { Users, Shield, CheckCircle2, ChevronRight, Info, UserCheck } from 'lucide-react';
 import { PageTitle, Panel, StatusPill } from "./Shared";
-import { familyLinks, persons, cases } from "../data";
+import { familyLinks, persons } from "../data";
 import { translate } from "../i18n";
 import type { FamilyLink } from "../types";
 
 export function FamilyLinks({
-  t,
+  _t,
   privacyMode
 }: {
-  t: (key: Parameters<typeof translate>[1]) => string;
+  _t?: (key: Parameters<typeof translate>[1]) => string;
+  t?: (key: Parameters<typeof translate>[1]) => string;
   privacyMode: boolean;
 }) {
   const [selectedLink, setSelectedLink] = useState<FamilyLink>(familyLinks[0]);
   const [verifiedMatches, setVerifiedMatches] = useState<Record<string, boolean>>({});
 
   const person = persons.find((p) => p.id === selectedLink.personId);
-  const relatedCase = cases.find((c) => c.id === selectedLink.caseId);
 
   const toggleVerification = (linkId: string) => {
     setVerifiedMatches(prev => ({ ...prev, [linkId]: !prev[linkId] }));

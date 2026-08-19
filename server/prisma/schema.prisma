@@ -45,6 +45,7 @@ model Person {
 
   cases       Case[]
   familyLinks FamilyLink[]
+  consents    Consent[]
 }
 
 enum Sex {
@@ -173,4 +174,16 @@ model ServicePoint {
   lng      Float
   hours    String
   services String
+}
+
+model Consent {
+  id              String    @id @default(uuid())
+  personId        String
+  purpose         String
+  scope           String
+  grantedAt       DateTime  @default(now())
+  revokedAt       DateTime?
+  grantedByUserId String
+
+  person Person @relation(fields: [personId], references: [id])
 }

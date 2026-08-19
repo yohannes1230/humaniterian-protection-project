@@ -270,7 +270,6 @@ export function App() {
             <Router
               path={path}
               t={t}
-              role={role}
               privacyMode={privacyMode}
               createDemoCase={createDemoCase}
               localCases={localCases}
@@ -286,7 +285,6 @@ export function App() {
 function Router({
   path,
   t,
-  role,
   privacyMode,
   createDemoCase,
   localCases,
@@ -294,7 +292,6 @@ function Router({
 }: {
   path: string;
   t: (key: Parameters<typeof translate>[1]) => string;
-  role: Role;
   privacyMode: boolean;
   createDemoCase: () => void;
   localCases: HumanitarianCase[];

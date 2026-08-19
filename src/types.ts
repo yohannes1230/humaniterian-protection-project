@@ -27,6 +27,16 @@ export interface User {
   mfaEnabled: boolean;
 }
 
+export interface Consent {
+  id: string;
+  personId: string;
+  purpose: string;
+  scope: string;
+  grantedAt: string;
+  revokedAt?: string | null;
+  grantedByUserId: string;
+}
+
 export interface Person {
   id: string;
   pseudonym: string;
@@ -36,6 +46,7 @@ export interface Person {
   lastKnownLocation: string;
   verificationStatus: "Verified" | "Unverified" | "Pending";
   restrictedName?: string;
+  consents?: Consent[];
 }
 
 export interface HumanitarianCase {

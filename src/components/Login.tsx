@@ -233,7 +233,7 @@ export function Login() {
 
         {/* Footer info */}
         <div className="login-footer">
-          <span>HPIS Platform v2.0 &bull; Independent Portfolio Prototype &bull; WCAG 2.1 AA Compliant</span>
+          <span>HPIS Platform v2.0 &bull; Independent Portfolio Prototype &bull; Designed with WCAG 2.1 AA Guidelines in Mind</span>
         </div>
 
       </div>
